@@ -18,9 +18,9 @@ namespace Clone {
         if (direction == CameraMovement::RIGHT)
             Position += Right * velocity;
         if (direction == CameraMovement::UP)
-            Position += Up * velocity;
+            Position += WorldUp * velocity;
         if (direction == CameraMovement::DOWN)
-            Position -= Up * velocity;
+            Position -= WorldUp * velocity;
     }
 
     void Camera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch)
