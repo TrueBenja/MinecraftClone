@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_subdirectory(thirdparty/glfw)
 
-add_executable(MinecraftClone glad.c main.cpp Shader.cpp Shader.h Cube.cpp Cube.h Camera.cpp Camera.h)
+add_subdirectory(src)
 
 target_include_directories(MinecraftClone PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(MinecraftClone PRIVATE glfw)
