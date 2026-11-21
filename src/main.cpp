@@ -2,12 +2,11 @@
 
 #include "../include/glad/glad.h"
 #include "GLFW/glfw3.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 
 #include "Cube.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
+#include "Window.hpp"
 
 namespace Clone
 {
@@ -21,15 +20,9 @@ bool firstMouse{true};
 
 void error_callback(int32_t error, const char *msg);
 
-void framebuffer_size_callback(GLFWwindow *window, int32_t width, int32_t height);
 void mouse_callback(GLFWwindow *window, double xPos, double yPos);
 void scroll_callback(GLFWwindow *window, double xOffset, double yOffset);
 void processInput(GLFWwindow *window);
-
-void framebuffer_size_callback(GLFWwindow *window, int32_t width, int32_t height)
-{
-    glViewport(0, 0, width, height);
-}
 
 void processInput(GLFWwindow *window)
 {
@@ -82,42 +75,9 @@ int main()
     constexpr int32_t initWindowWidth{800};
     constexpr int32_t initWindowHeight{600};
 
-    if (!glfwInit())
-    {
-        std::println(std::cerr, "Failed to init GLFW");
-        return -1;
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif //__APPLE__
+    Clone::Window window{initWindowWidth, initWindowHeight, "Minecraft Clone"};
 
     glfwSetErrorCallback(Clone::error_callback);
-
-    GLFWwindow *window = glfwCreateWindow(initWindowWidth, initWindowHeight, "Minecraft Clone", nullptr, nullptr);
-
-    if (window == nullptr)
-    {
-        std::println(std::cerr, "Failed creating window");
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::println(std::cerr, "Failed loading GLAD");
-        return -1;
-    }
-
-    glViewport(0, 0, initWindowWidth, initWindowHeight);
-    glfwSetFramebufferSizeCallback(window, Clone::framebuffer_size_callback);
-
     Clone::Shader shader{"./shaders/shader.vert", "./shaders/shader.frag"};
 
     uint32_t VAO, VBO;
@@ -142,17 +102,17 @@ int main()
     shader.Use();
 
     glEnable(GL_DEPTH_TEST);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, Clone::mouse_callback);
-    glfwSetScrollCallback(window, Clone::scroll_callback);
+    glfwSetInputMode(window.GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window.GetGLFWWindow(), Clone::mouse_callback);
+    glfwSetScrollCallback(window.GetGLFWWindow(), Clone::scroll_callback);
 
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window.GetGLFWWindow()))
     {
         float currentFrame{(float)glfwGetTime()};
         Clone::deltaTime = currentFrame - Clone::lastFrame;
         Clone::lastFrame = currentFrame;
 
-        Clone::processInput(window);
+        Clone::processInput(window.GetGLFWWindow());
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -164,7 +124,7 @@ int main()
             glm::lookAt(Clone::camera.Position, Clone::camera.Position + Clone::camera.Front, Clone::camera.Up)};
 
         int32_t screenWidth, screenHeight;
-        glfwGetWindowSize(window, &screenWidth, &screenHeight);
+        glfwGetWindowSize(window.GetGLFWWindow(), &screenWidth, &screenHeight);
         glm::mat4 projection{
             glm::perspective(glm::radians(Clone::camera.Fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f)};
 
@@ -175,7 +135,7 @@ int main()
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(window.GetGLFWWindow());
         glfwPollEvents();
     }
 }
